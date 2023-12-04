@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clock with Language Selector</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Montserrat', sans-serif;
+        color: white;
+        background-color: black;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 20px 0;
+    }
+
+    .clock, .date, .actual-time {
+        margin: 5px 0;
+        font-size: 18px;
+    }
+
+    footer {
+        font-size: 12px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .language-selector {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        border-radius: 5px;
+    }
+</style>
+<script>
+var currentLanguage = 'en';
+var languageOptions = {
+    'en': {
+        titleBrasilia: 'Brasília Time',
+        titleNewYork: 'New York Time',
+        titleGamastudios: 'GamaStudios Timezone',
+        footerText: 'Created by GamaStudios Incorporated for the 1st Corporate Office.'
+    },
+    'pt-BR': {
+        titleBrasilia: 'Horário de Brasília',
+        titleNewYork: 'Horário de Nova Iorque',
+        titleGamastudios: 'Fuso Horário GamaStudios',
+        footerText: 'Criado por GamaStudios Incorporated para o 1º Escritório Empresarial.'
+    }
+};
+
+// Função que retorna a hora e minutos formatados para o GamaStudios Timezone
+function formatGamaStudiosTime(date) {
+    var totalMinutes = date.getMinutes() + 72; // 72 minutos fictícios
+    var gsHours = date.getHours() + Math.floor(totalMinutes / 60);
+    var gsMinutes = totalMinutes % 60;
+    var gsSeconds = date.getSeconds();
+
+    // Formatação para exibir os minutos e segundos corretamente com dois dígitos
+    gsMinutes = gsMinutes < 10 ? '0' + gsMinutes : gsMinutes;
+    gsSeconds = gsSeconds < 10 ? '0' + gsSeconds : gsSeconds;
+
+    // Quando os minutos atingem 60, eles devem reiniciar a partir de 12, então ajustamos isso
+    if (totalMinutes >= 60) {
+        gsMinutes = (totalMinutes - 60) + 12; // Acréscimo de 12 para simular até 72 minutos
+        gsMinutes = gsMinutes < 10 ? '0' + gsMinutes : gsMinutes;
+    }
+
+    return ((gsHours % 24) + ':' + gsMinutes + ':' + gsSeconds);
+}
+
+function updateClocks() {
+    var now = new Date();
+    var locales = currentLanguage === 'en' ? 'en-US' : 'pt-BR';
+    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+
+    document.getElementById('clock-brasilia').textContent = now.toLocaleTimeString(locales);
+    document.getElementById('date-brasilia').textContent = now.toLocaleDateString(locales, options);
+
+    document.getElementById('clock-ny').textContent = now.toLocaleTimeString(locales, { timeZone: 'America/New_York' });
+    document.getElementById('date-ny').textContent = now.toLocaleDateString(locales, { timeZone: 'America/New_York', ...options });
+
+    var gsTime = formatGamaStudiosTime(now);
+    document.getElementById('clock-gamastudios').textContent = gsTime;
+    document.getElementById('date-gamastudios').textContent = now.toLocaleString(locales, options);
+
+    // Atualizar títulos e texto do rodapé com base no idioma selecionado
+    document.getElementById('title-brasilia').textContent = languageOptions[currentLanguage].titleBrasilia;
+    document.getElementById('title-ny').textContent = languageOptions[currentLanguage].titleNewYork;
+    document.getElementById('title-gamastudios').textContent = languageOptions[currentLanguage].titleGamastudios;
+    document.getElementById('footer-text').textContent = languageOptions[currentLanguage].footerText;
+}
+
+function changeLanguage(lang) {
+    currentLanguage = lang;
+    updateClocks();
+    document.documentElement.lang = currentLanguage;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setInterval(updateClocks, 1000);
+});
+
+</script>
+</head>
+<body>
+<select class="language-selector" onchange="changeLanguage(this.value)">
+    <option value="en" selected>English</option>
+    <option value="pt-BR">Português</option>
+</select>
+
+<div>
+    <div class="title" id="title-brasilia"></div>
+    <div class="clock" id="clock-brasilia"></div>
+    <div class="date" id="date-brasilia"></div>
+</div>
+
+<div>
+    <div class="title" id="title-ny"></div>
+    <div class="clock" id="clock-ny"></div>
+    <div class="date" id="date-ny"></div>
+</div>
+
+<div>
+    <div class="title" id="title-gamastudios"></div>
+    <div class="clock" id="clock-gamastudios"></div>
+    <div class="date" id="date-gamastudios"></div>
+</div>
+
+<footer>
+    <span id="footer-text"></span>
+</footer>
+</body>
+</html>
